@@ -1,0 +1,12 @@
+1,2c1,6
+< 1
+< 1
+\ No newline at end of file
+---
+> 5
+> 2 3 5
+> 1 1
+> 1 2
+> 1 1
+> 1 4
+\ No newline at end of file
