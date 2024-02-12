@@ -20,7 +20,7 @@ programs=("python3 main.py") # TODO: Add the programs to run here
 test_files=$(ls test/input)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=600
+timeout_duration=10
 
 # Output folder
 output_folder="test-out"
@@ -30,6 +30,10 @@ program_pass_count=()
 program_total_count=()
 program_timeout_count=()
 program_time=()
+
+
+# Get the OS type for OS specific commands
+os_type=$(uname)
 
 # Test each program
 for program in "${programs[@]}"
@@ -58,7 +62,14 @@ do
             total_count=$((total_count+1))
 
         # Run the program
-        gtimeout $timeout_duration $program test/input/$file $output_folder/$output_file
+        if [ $os_type = "Linux" ]; then
+            # Linux
+            timeout $timeout_duration $program test/input/$file $output_folder/$output_file
+        else
+            # Mac
+            gtimeout $timeout_duration $program test/input/$file $output_folder/$output_file
+        fi
+
         exit_status=$?
 
          # Check if program timed out

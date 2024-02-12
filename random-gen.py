@@ -4,13 +4,15 @@ import random
 def generate_random_graph_data(num_nodes):
     graph_data = {'num_nodes': num_nodes, 'nodes': []}
 
-    for _ in range(num_nodes):
+    for i in range(num_nodes):
         # Generate random number of parents for each node (between 0 and num_nodes - 1)
         max_parents = 25
         num_parents = random.randint(0, min(num_nodes - 1, max_parents))
 
-        # Generate a list of unique random parents
+        # Generate a list of unique random parents (between 1 and num_nodes), preventing self-loops
         parents = random.sample(range(1, num_nodes + 1), num_parents)
+        if i + 1 in parents:
+            parents.remove(i + 1)
 
         # Add the node to the graph data
         graph_data['nodes'].append({'parents': parents})
@@ -29,4 +31,4 @@ def generate_output_file(filename, graph_data):
             file.write(f"{len(node['parents'])} {parents}\n")
 
 
-generate_output_file('output.txt', generate_random_graph_data(100000))
+generate_output_file('output.txt', generate_random_graph_data(1000))
