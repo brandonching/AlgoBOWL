@@ -62,6 +62,26 @@ def get_nodes_to_remove_from_output(output_file):
     return nodes_to_remove
 
 
+def prune_graph(graph):
+    '''
+    Prune the graph of any nodes with no parents
+    @graph: the graph to prune
+    @returns: the pruned graph
+    '''
+    # Get the nodes with no parents
+    nodes_to_remove = [
+        node for node in graph.nodes if graph.in_degree(node) == 0]
+
+    # Remove the nodes from the graph
+    graph.remove_nodes_from(nodes_to_remove)
+
+    # recursively prune the graph until no more nodes with no parents are found
+    if len(nodes_to_remove) > 0:
+        return prune_graph(graph)
+    else:
+        return graph
+
+
 if __name__ == "__main__":
     # get the input file from the arguments
     input_file = sys.argv[1]

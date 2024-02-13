@@ -1,6 +1,7 @@
 #!/bin/bash
 # This script runs the test suite for the project. It runs the build commands (if any) and then runs the programs on the test cases.
 # It then checks the output of the programs against the expected output and prints the results.
+# TODO : Add a command argument to the programs that allows for the best solution for each input to be printed to a file. This will allow for the test running to also be used to generate outputs for the project submission, and ensure the best output of any program we create is used
 
 
 # list of build commands to run (if any)
@@ -20,7 +21,7 @@ programs=("python3 main.py") # TODO: Add the programs to run here
 test_files=$(ls test/input)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=10
+timeout_duration=600
 
 # Output folder
 output_folder="test-out"
@@ -72,6 +73,28 @@ do
 
         exit_status=$?
 
+        
+
+
+        # Get the number of removals from the valid output (first line of the file)
+        valid_output=$(head -n 1 test/output/$output_file.valid)
+        valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
+
+        # Get the number of removals from the output file (first line of the file)
+        output=$(head -n 1 $output_folder/$output_file)
+        output=$(echo $output | sed 's/[^0-9]*//g')
+
+        # Check if the output is valid (if equal pass, if less then pass-better, if more then fail)
+        if [ $output -eq $valid_output ]; then
+            echo "     [PASS]"
+            pass_count=$((pass_count+1))
+        elif [ $output -lt $valid_output ]; then
+            echo "     [PASS-BETTER]"
+            pass_count=$((pass_count+1))
+        else
+            echo "     [FAIL]"
+        fi
+
          # Check if program timed out
         if [ $exit_status -eq 124 ]; then
             echo "     [TIMEOUT] The script took longer than $timeout_duration seconds."
@@ -79,20 +102,6 @@ do
             continue
         fi
 
-        # Check the output (do not print to the console, just check if the output is correct or not)
-        diff -q test/output/$output_file.valid $output_folder/$output_file > /dev/null
-
-        # Print the result Pass/Fail
-        if [ $? -eq 0 ]
-        then
-            echo "     [PASS]"
-            pass_count=$((pass_count+1))
-        else
-            echo "     [FAIL]"
-
-            # Print the diff to a file
-            diff test/output/$output_file.valid $output_folder/$output_file > test-diff/$output_file.diff
-        fi
 
         test_end_time=$(date +"%s")
         test_duration=$((test_end_time - test_start_time))

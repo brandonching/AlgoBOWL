@@ -1,12 +1,11 @@
 import sys
 import networkx as nx
-import tools.helper as helper
+import helper as helper
 
 
 def main(input_file, output_file):
     # Build Graph
     G = helper.build_graph(input_file)
-    num_nodes = G.number_of_nodes()
 
     ##############################
     # Check graph and remove nodes
@@ -16,9 +15,23 @@ def main(input_file, output_file):
     if nx.is_directed_acyclic_graph(G):
         return True
 
+    # prune the graph by removing nodes with no parents
+    G = helper.prune_graph(G)
+    num_nodes = G.number_of_nodes()
+
     # conduct a traversal on the graph to find the best nodes to remove
-    nodes_to_remove = []
+    nodes_to_remove = set()
+    # default nodes to remove is all nodes
+    for node in G:
+        nodes_to_remove.add(node)
     for start_node in range(1, num_nodes + 1):
+        # Print out progress every 1000 nodes
+        if start_node % 1000 == 0:
+            print('Progress: ' + str(start_node) + '/' + str(num_nodes))
+
+        # Check if the start node is still in the graph
+        if start_node not in G:
+            continue
         # initialize a set of unique values to store the nodes to remove
         this_nodes_to_remove = set()
         visited = set()
@@ -35,26 +48,17 @@ def main(input_file, output_file):
                 else:
                     stack.append(child)
 
-        # append this solution to the list of solutions
-        nodes_to_remove.append(this_nodes_to_remove)
+        # if this solution is better than the previous best solution, then update the best solution
+        if len(this_nodes_to_remove) < len(nodes_to_remove):
+            nodes_to_remove = this_nodes_to_remove
+            if helper.check_validity(G, nodes_to_remove):
+                write_output(output_file, nodes_to_remove)
 
-    ##############################
-    # Find the best solution
-    ##############################
 
-    # sort the list of solutions by length
-    nodes_to_remove.sort(key=len)
-    # default solution to remove all nodes
-    solution = list(range(1, num_nodes + 1))
-    for nodes in nodes_to_remove:
-        if helper.check_validity(G, nodes):
-            solution = nodes
-            break
-
-    ##############################
-    # Write output file
-    ##############################
-
+def write_output(output_file, solution):
+    '''
+    Write the output file
+    '''
     # open the output file
     with open(output_file, 'w') as file:
         # write the number of nodes to remove
