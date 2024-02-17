@@ -13,15 +13,16 @@
 #     $command
 # done
 
+trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Programs to run 
-programs=("python3 main.py") # TODO: Add the programs to run here
+programs=("python3 main2.py") # TODO: Add the programs to run here
 
 # List of test files
 test_files=$(ls test/input)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=600
+timeout_duration=300
 
 # Output folder
 output_folder="test-out"

@@ -82,6 +82,18 @@ def prune_graph(graph):
         return graph
 
 
+def write_output(output_file, solution):
+    '''
+    Write the output file
+    '''
+    # open the output file
+    with open(output_file, 'w') as file:
+        # write the number of nodes to remove
+        file.write(str(len(solution)) + '\n')
+        # write the nodes to remove
+        file.write(' '.join(map(str, solution)))
+
+
 if __name__ == "__main__":
     # get the input file from the arguments
     input_file = sys.argv[1]

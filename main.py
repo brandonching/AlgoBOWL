@@ -52,19 +52,7 @@ def main(input_file, output_file):
         if len(this_nodes_to_remove) < len(nodes_to_remove):
             nodes_to_remove = this_nodes_to_remove
             if helper.check_validity(G, nodes_to_remove):
-                write_output(output_file, nodes_to_remove)
-
-
-def write_output(output_file, solution):
-    '''
-    Write the output file
-    '''
-    # open the output file
-    with open(output_file, 'w') as file:
-        # write the number of nodes to remove
-        file.write(str(len(solution)) + '\n')
-        # write the nodes to remove
-        file.write(' '.join(map(str, solution)))
+                helper.write_output(output_file, nodes_to_remove)
 
 
 if __name__ == "__main__":
