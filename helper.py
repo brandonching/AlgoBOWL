@@ -72,6 +72,8 @@ def prune_graph(graph):
     nodes_to_remove = [
         node for node in graph.nodes if graph.in_degree(node) == 0]
 
+    # add nodes with no children to the list of nodes to remove
+
     # Remove the nodes from the graph
     graph.remove_nodes_from(nodes_to_remove)
 
@@ -79,7 +81,38 @@ def prune_graph(graph):
     if len(nodes_to_remove) > 0:
         return prune_graph(graph)
     else:
+        report_graph_stats(graph)
         return graph
+
+
+def report_graph_stats(graph):
+    '''
+    Report the statistics of the graph
+    @graph: the graph
+    '''
+    print('Number of nodes: ' + str(graph.number_of_nodes()))
+    print('Number of edges: ' + str(graph.number_of_edges()))
+    print('Is directed acyclic graph: ' +
+          str(nx.is_directed_acyclic_graph(graph)))
+
+    # Create a map to count the number of children for each node
+    children_count = {}
+    parents_count = {}
+    for node in graph:
+        children_count[node] = len(list(graph.successors(node)))
+        parents_count[node] = len(list(graph.predecessors(node)))
+
+    # Print the number of children for each node
+    print('Children count:')
+    for child_size in set(children_count.values()):
+        print(str(child_size),
+              str(list(children_count.values()).count(child_size)))
+
+    # Print the number of parents for each node
+    print('Parents count:')
+    for parent_size in set(parents_count.values()):
+        print(str(parent_size),
+              str(list(parents_count.values()).count(parent_size)))
 
 
 def write_output(output_file, solution):
@@ -92,6 +125,20 @@ def write_output(output_file, solution):
         file.write(str(len(solution)) + '\n')
         # write the nodes to remove
         file.write(' '.join(map(str, solution)))
+
+
+def validate_output(input_file, output_file):
+    '''
+    Validate the output file
+    '''
+    # Build the graph from the input file
+    G = build_graph(input_file)
+
+    # Get the nodes to remove from the output file
+    nodes_to_remove = get_nodes_to_remove_from_output(output_file)
+
+    # Check if the solution is valid
+    return check_validity(G, nodes_to_remove)
 
 
 if __name__ == "__main__":

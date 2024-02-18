@@ -6,7 +6,7 @@ def generate_random_graph_data(num_nodes):
 
     for i in range(num_nodes):
         # Generate random number of parents for each node (between 0 and num_nodes - 1)
-        max_parents = 25
+        max_parents = random.randint(0, num_nodes - 1)
         num_parents = random.randint(0, min(num_nodes - 1, max_parents))
 
         # Generate a list of unique random parents (between 1 and num_nodes), preventing self-loops

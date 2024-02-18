@@ -28,7 +28,6 @@ def main(input_file, output_file):
     block_size = 1000
     # Process a max of 1000 nodes at a time
     for node_block in range(1, num_nodes + 1, block_size):
-        print(block_range, best_solution_length)
 
         block_range = range(node_block, min(
             node_block + block_size, num_nodes + 1))
@@ -53,7 +52,7 @@ def main(input_file, output_file):
                     solutions[length] = set()
                 solutions[length].add(index + 1)
 
-                if length < best_solution_length:
+                if length < best_solution_length and helper.check_validity(G, results[index]):
                     best_solution_length = length
                     helper.write_output(output_file, results[index])
 
@@ -78,12 +77,9 @@ def search_graph(start_node, graph, output_file=None):
         # for each of the node's children, check if it is already visited. If it is, then a cycle is found and the node is added to the list of nodes to remove. If it is not, then add it to the stack
         for child in graph[node]:
             if child in visited:
-                this_nodes_to_remove.add(child)
+                this_nodes_to_remove.add(node)
             else:
                 stack.append(child)
-
-    if output_file is not None:
-        helper.write_output(output_file, this_nodes_to_remove)
 
     return this_nodes_to_remove
 
@@ -95,3 +91,9 @@ if __name__ == "__main__":
 
     # Run the main function
     main(input_file, output_file)
+
+    # Validate the output
+    if helper.validate_output(input_file, output_file):
+        print('Output is valid')
+    else:
+        print('Output is invalid')
