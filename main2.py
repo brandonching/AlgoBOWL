@@ -21,7 +21,6 @@ def main(input_file, output_file):
 
     helper.write_output(output_file, nodes_to_remove)
 
-    print('Number of nodes: ' + str(num_nodes))
     solutions = {}
     solutions[num_nodes] = nodes_to_remove
     best_solution_length = num_nodes
@@ -31,7 +30,6 @@ def main(input_file, output_file):
 
         block_range = range(node_block, min(
             node_block + block_size, num_nodes + 1))
-        print(block_range, best_solution_length)
 
         # create a pool of workers
         pool = multiprocessing.Pool()

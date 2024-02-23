@@ -81,7 +81,6 @@ def prune_graph(graph):
     if len(nodes_to_remove) > 0:
         return prune_graph(graph)
     else:
-        report_graph_stats(graph)
         return graph
 
 
