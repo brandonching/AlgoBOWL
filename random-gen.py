@@ -38,4 +38,4 @@ def generate_output_file(filename, graph_data):
 
 for i in range(41, 61):
     output_file_name = f'test/input/{i}-large-random.in'
-    generate_output_file(output_file_name, generate_random_graph_data(1000))
+    generate_output_file(output_file_name, generate_random_graph_data(10000))

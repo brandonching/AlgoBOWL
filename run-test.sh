@@ -16,7 +16,7 @@
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Programs to run 
-programs=("python3 main2.py" "python3 main3.py") # TODO: Add the programs to run here
+programs=( "python3 main3.py") # TODO: Add the programs to run here
 
 # Input Folder Name
 input_folder="test/input"
@@ -37,7 +37,7 @@ rm -rf $output_folder
 test_files=$(ls $input_folder)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=30
+timeout_duration=300
 
 
 # Initialize the arrays to store the statistics
@@ -94,6 +94,12 @@ do
         # Get the number of removals from the valid output (first line of the file)
         valid_output=$(head -n 1 $valid_output_folder/$output_file.valid)
         valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
+
+        # If the valid output file does not exist, copy the output file to the valid output folder
+        if [ ! -f $valid_output_folder/$output_file.valid ]; then
+            echo "     [NEW] $output_file is a new output file"
+            cp $output_folder/$output_file $valid_output_folder/$output_file.valid
+        fi
 
         # Get the number of removals from the output file (first line of the file)
         output=$(head -n 1 $output_folder/$output_file)
