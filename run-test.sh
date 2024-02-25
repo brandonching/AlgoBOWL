@@ -1,7 +1,6 @@
 #!/bin/bash
 # This script runs the test suite for the project. It runs the build commands (if any) and then runs the programs on the test cases.
 # It then checks the output of the programs against the expected output and prints the results.
-# TODO : Add a command argument to the programs that allows for the best solution for each input to be printed to a file. This will allow for the test running to also be used to generate outputs for the project submission, and ensure the best output of any program we create is used
 
 
 # list of build commands to run (if any)
@@ -15,13 +14,17 @@
 
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
-# Programs to run 
-programs=("python3 main3.py" "python3 main4.py") # TODO: Add the programs to run here
-
-# Input Folder Name
+# Input Folder Name 
+programs=("python3 main3.py" "python3 main4.py") # TODO: Add the programs to run here (e.g. "python3 main.py", "java Main", "g++ main.cpp -o main", etc.)
 input_folder="test/input"
 output_folder="test-out"
 valid_output_folder="test/output"
+timeout_duration=300
+
+############################################
+# YOU SHOULD NOT NEED TO MODIFY BELOW HERE
+# ONLY MODIFY THE ABOVE VARIABLES
+############################################
 
 # check if the --validate flag is set
 if [ "$1" = "--validateonly" ]; then
@@ -35,10 +38,6 @@ rm -rf $output_folder
 
 # List of test files
 test_files=$(ls $input_folder)
-
-# Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=300
-
 
 # Initialize the arrays to store the statistics
 program_pass_count=()
