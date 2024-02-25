@@ -5,12 +5,12 @@ import sys
 
 def main(input_file, output_file):
     # Build Graph
-    G = helper.build_graph(input_file)
-    if nx.is_directed_acyclic_graph(G):
+    full_graph = helper.build_graph(input_file)
+    if nx.is_directed_acyclic_graph(full_graph):
         # if the graph is already a DAG, then return
         helper.write_output(output_file, [])
         return True
-    G = helper.prune_graph(G)
+    G = helper.prune_graph(full_graph)
     num_nodes = G.number_of_nodes()
 
     # default to remove all nodes
@@ -18,7 +18,8 @@ def main(input_file, output_file):
     for node in G:
         nodes_to_remove.add(node)
 
-    helper.write_output(output_file, nodes_to_remove)
+    if helper.check_validity(full_graph, nodes_to_remove):
+        helper.write_output(output_file, nodes_to_remove)
 
     # reset nodes to remove
     nodes_to_remove = set()
@@ -47,7 +48,8 @@ def main(input_file, output_file):
         nodes_to_remove.add(max_node)
 
     # Write the output
-    helper.write_output(output_file, nodes_to_remove)
+    if helper.check_validity(full_graph, nodes_to_remove):
+        helper.write_output(output_file, nodes_to_remove)
 
 
 if __name__ == "__main__":
@@ -57,9 +59,3 @@ if __name__ == "__main__":
 
     # Run the main function
     main(input_file, output_file)
-
-    # Validate the output
-    if helper.validate_output(input_file, output_file):
-        print('Output is valid')
-    else:
-        print('Output is invalid')

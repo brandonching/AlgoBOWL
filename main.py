@@ -4,30 +4,33 @@ import helper as helper
 
 
 def main(input_file, output_file):
-    print('Running main')
     # Build Graph
-    G = helper.build_graph(input_file)
+    full_graph = helper.build_graph(input_file)
 
     ##############################
     # Check graph and remove nodes
     ##############################
 
     # test if graph is already a directed acyclic graph
-    if nx.is_directed_acyclic_graph(G):
+    if nx.is_directed_acyclic_graph(full_graph):
         # if the graph is already a DAG, then return
         helper.write_output(output_file, [])
         print('Graph is already a DAG')
         return True
 
     # prune the graph by removing nodes with no parents
-    G = helper.prune_graph(G)
+    G = helper.prune_graph(full_graph)
     num_nodes = G.number_of_nodes()
 
-    # conduct a traversal on the graph to find the best nodes to remove
+    # default to remove all nodes
     nodes_to_remove = set()
-    # default nodes to remove is all nodes
     for node in G:
         nodes_to_remove.add(node)
+
+    if helper.check_validity(full_graph, nodes_to_remove):
+        helper.write_output(output_file, nodes_to_remove)
+
+    nodes_to_remove = set()
     for start_node in range(1, num_nodes + 1):
         # Print out progress every 1000 nodes
         if start_node % 1000 == 0:
@@ -55,7 +58,7 @@ def main(input_file, output_file):
         # if this solution is better than the previous best solution, then update the best solution
         if len(this_nodes_to_remove) < len(nodes_to_remove):
             nodes_to_remove = this_nodes_to_remove
-            if helper.check_validity(G, nodes_to_remove):
+            if helper.check_validity(full_graph, nodes_to_remove):
                 helper.write_output(output_file, nodes_to_remove)
 
 

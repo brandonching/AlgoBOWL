@@ -16,12 +16,12 @@
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Programs to run 
-programs=("python3 main.py" "python3 main2.py" "python3 main3.py") # TODO: Add the programs to run here
+programs=("python3 main2.py" "python3 main3.py") # TODO: Add the programs to run here
 
 # Input Folder Name
-input_folder="test/other-input"
+input_folder="test/input"
 output_folder="test-out"
-valid_output_folder="test/other-output"
+valid_output_folder="test/output"
 
 # check if the --validate flag is set
 if [ "$1" = "--validateonly" ]; then
@@ -37,7 +37,7 @@ rm -rf $output_folder
 test_files=$(ls $input_folder)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
-timeout_duration=300
+timeout_duration=30
 
 
 # Initialize the arrays to store the statistics
@@ -132,6 +132,50 @@ do
     program_time+=($((end_time - start_time)))
     echo "Passed $pass_count out of $total_count tests in $((end_time - start_time)) seconds" 
 
+    # Run the python script to validate the output
+    if [ "$1" = "--validate" ]; then
+        echo "Running the validation script"
+        python3 validate.py $input_folder $output_folder
+
+        # check if the update flag is set
+        if [ "$2" = "--update" ]; then
+            echo "Updating the valid output folder"
+            update_count=0
+            total_precent_improvement=0
+            # for each file in the output folder, check if it is an improvement and update the valid output folder
+            for file in $test_files
+            do
+                precent_improvement=0
+                output_file=$(echo $file | sed 's/.in/.out.valid/')
+                # if the output file contains the .valid extension, continue
+                if [[ $output_file == *".valid"* ]]; then
+                    # Get the number of removals from the valid output (first line of the file)
+                    valid_output=$(head -n 1 $valid_output_folder/$output_file)
+                    valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
+
+                    # Get the number of removals from the output file (first line of the file)
+                    output=$(head -n 1 $output_folder/$output_file)
+                    output=$(echo $output | sed 's/[^0-9]*//g')
+
+                    # Check if the output is valid (if equal pass, if less then pass-better, if more then fail)
+                    if [ $output -lt $valid_output ]; then
+                        echo "     [UPDATE] $output_file is an improvement"
+                        cp $output_folder/$output_file $valid_output_folder/$output_file
+                        update_count=$((update_count+1))
+                        precent_improvement=$(echo "scale=2; ($valid_output - $output) / $valid_output * 100" | bc)
+                        total_precent_improvement=$(echo "scale=2; $total_precent_improvement + $precent_improvement" | bc)
+                    fi
+                fi
+            done
+            echo "Updated $update_count files"
+            if [ $update_count -gt 0 ]; then
+                echo "Average improvement: $(echo "scale=2; $total_precent_improvement / $update_count" | bc)%"
+            fi
+            
+        fi
+        echo "Validation complete"
+    fi
+
 done
 
 echo "---------------------------------------------------------------------------------------------"
@@ -154,46 +198,3 @@ done
 
 echo "---------------------------------------------------------------------------------------------"
 
-# Run the python script to validate the output
-if [ "$1" = "--validate" ]; then
-    echo "Running the validation script"
-    python3 validate.py $input_folder $output_folder
-
-    # check if the update flag is set
-    if [ "$2" = "--update" ]; then
-        echo "Updating the valid output folder"
-        update_count=0
-        total_precent_improvement=0
-        # for each file in the output folder, check if it is an improvement and update the valid output folder
-        for file in $test_files
-        do
-            precent_improvement=0
-            output_file=$(echo $file | sed 's/.in/.out.valid/')
-            # if the output file contains the .valid extension, continue
-            if [[ $output_file == *".valid"* ]]; then
-                # Get the number of removals from the valid output (first line of the file)
-                valid_output=$(head -n 1 $valid_output_folder/$output_file)
-                valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
-
-                # Get the number of removals from the output file (first line of the file)
-                output=$(head -n 1 $output_folder/$output_file)
-                output=$(echo $output | sed 's/[^0-9]*//g')
-
-                # Check if the output is valid (if equal pass, if less then pass-better, if more then fail)
-                if [ $output -lt $valid_output ]; then
-                    echo "     [UPDATE] $output_file is an improvement"
-                    cp $output_folder/$output_file $valid_output_folder/$output_file
-                    update_count=$((update_count+1))
-                    precent_improvement=$(echo "scale=2; ($valid_output - $output) / $valid_output * 100" | bc)
-                    total_precent_improvement=$(echo "scale=2; $total_precent_improvement + $precent_improvement" | bc)
-                fi
-            fi
-        done
-        echo "Updated $update_count files"
-        if [ $update_count -gt 0 ]; then
-            echo "Average improvement: $(echo "scale=2; $total_precent_improvement / $update_count" | bc)%"
-        fi
-        
-    fi
-    echo "Validation complete"
-fi
