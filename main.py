@@ -13,6 +13,8 @@ def main(input_file, output_file):
 
     # test if graph is already a directed acyclic graph
     if nx.is_directed_acyclic_graph(G):
+        # if the graph is already a DAG, then return
+        helper.write_output(output_file, [])
         return True
 
     # prune the graph by removing nodes with no parents

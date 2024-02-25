@@ -16,16 +16,21 @@
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Programs to run 
-programs=("python3 main2.py") # TODO: Add the programs to run here
+programs=("python3 main.py") # TODO: Add the programs to run here
+
+# Input Folder Name
+input_folder="test/other-input"
+output_folder="test-out"
+valid_output_folder="test/other-output"
+
+# Delete all the files in the output folder
+rm -rf $output_folder
 
 # List of test files
-test_files=$(ls test/input)
+test_files=$(ls $input_folder)
 
 # Timeout duration in seconds (maximum time a program is allowed to run per test case)
 timeout_duration=300
-
-# Output folder
-output_folder="test-out"
 
 # Initialize the arrays to store the statistics
 program_pass_count=()
@@ -66,10 +71,10 @@ do
         # Run the program
         if [ $os_type = "Linux" ]; then
             # Linux
-            timeout $timeout_duration $program test/input/$file $output_folder/$output_file
+            timeout $timeout_duration $program $input_folder/$file $output_folder/$output_file
         else
             # Mac
-            gtimeout $timeout_duration $program test/input/$file $output_folder/$output_file
+            gtimeout $timeout_duration $program $input_folder/$file $output_folder/$output_file
         fi
 
         exit_status=$?
@@ -78,7 +83,7 @@ do
 
 
         # Get the number of removals from the valid output (first line of the file)
-        valid_output=$(head -n 1 test/output/$output_file.valid)
+        valid_output=$(head -n 1 $valid_output_folder/$output_file.valid)
         valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
 
         # Get the number of removals from the output file (first line of the file)

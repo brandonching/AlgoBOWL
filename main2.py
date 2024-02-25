@@ -10,6 +10,8 @@ def main(input_file, output_file):
     # Build Graph
     G = helper.build_graph(input_file)
     if nx.is_directed_acyclic_graph(G):
+        # if the graph is already a DAG, then return
+        helper.write_output(output_file, [])
         return True
     G = helper.prune_graph(G)
     num_nodes = G.number_of_nodes()
@@ -53,6 +55,12 @@ def main(input_file, output_file):
                 if length < best_solution_length and helper.check_validity(G, results[index]):
                     best_solution_length = length
                     helper.write_output(output_file, results[index])
+
+#    # print all the keys and the number of soulutions for each key
+#    for key in solutions:
+#        print(str(key) + ': ' + str(len(solutions[key])))
+#
+#    print('Total Keys: ' + str(len(solutions.keys())))
 
 
 def search_graph(start_node, graph, output_file=None):
