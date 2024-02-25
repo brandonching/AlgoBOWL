@@ -20,7 +20,6 @@ def validate(input_file, output_file):
     if (helper.validate_output(input_file, output_file)):
         # rename the file to add the .valid extension
         os.rename(output_file, output_file + '.valid')
-        print('Output', output_file, ' is valid for', input_file)
         return True
     else:
         # rename the file to add the .invalid extension

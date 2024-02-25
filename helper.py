@@ -125,8 +125,6 @@ def write_output(output_file, solution):
         # write the nodes to remove
         file.write(' '.join(map(str, solution)))
 
-    print('Output written to', output_file)
-
 
 def validate_output(input_file, output_file):
     '''

@@ -4,6 +4,7 @@ import helper as helper
 
 
 def main(input_file, output_file):
+    print('Running main')
     # Build Graph
     G = helper.build_graph(input_file)
 
@@ -15,6 +16,7 @@ def main(input_file, output_file):
     if nx.is_directed_acyclic_graph(G):
         # if the graph is already a DAG, then return
         helper.write_output(output_file, [])
+        print('Graph is already a DAG')
         return True
 
     # prune the graph by removing nodes with no parents

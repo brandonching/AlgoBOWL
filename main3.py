@@ -7,6 +7,8 @@ def main(input_file, output_file):
     # Build Graph
     G = helper.build_graph(input_file)
     if nx.is_directed_acyclic_graph(G):
+        # if the graph is already a DAG, then return
+        helper.write_output(output_file, [])
         return True
     G = helper.prune_graph(G)
     num_nodes = G.number_of_nodes()
@@ -18,33 +20,34 @@ def main(input_file, output_file):
 
     helper.write_output(output_file, nodes_to_remove)
 
-    # attempt to brute force the solution by removing nodes and checking if the graph is still a DAG
-    solutions = {}
-    solutions[num_nodes] = nodes_to_remove
-    best_solution_length = num_nodes
-    block_size = 1000
-    # Process a max of 1000 nodes at a time
+    # reset nodes to remove
+    nodes_to_remove = set()
 
-    for node_block in range(1, num_nodes + 1, block_size):
+    while not nx.is_directed_acyclic_graph(G):
+        # Find a cycle
+        cycle = nx.find_cycle(G)
 
-        block_range = range(node_block, min(
-            node_block + block_size, num_nodes + 1))
+        # get a list of all the nodes in the cycle
+        cycle_nodes = set()
+        for edge in cycle:
+            cycle_nodes.add(edge[0])
+            cycle_nodes.add(edge[1])
 
-        for node in block_range:
-            # remove the node from the graph
-            G.remove_node(node)
-            # check if the graph is still a DAG
-            if nx.is_directed_acyclic_graph(G):
-                # if it is, add the node to the solution
-                if len(G.nodes) not in solutions:
-                    solutions[len(G.nodes)] = set()
-                solutions[len(G.nodes)].add(node)
-                if len(G.nodes) < best_solution_length and helper.check_validity(G, G.nodes):
-                    best_solution_length = len(G.nodes)
-                    helper.write_output(output_file, G.nodes)
-            else:
-                # if it is not, add the node back to the graph
-                G.add_node(node)
+        # remove the node with the highest out degree + in degree
+        max_node = None
+        max_degree = -1
+        for node in cycle_nodes:
+            degree = G.in_degree(node) + G.out_degree(node)
+            if degree > max_degree:
+                max_node = node
+                max_degree = degree
+
+        # remove the node from the graph
+        G.remove_node(max_node)
+        nodes_to_remove.add(max_node)
+
+    # Write the output
+    helper.write_output(output_file, nodes_to_remove)
 
 
 if __name__ == "__main__":
