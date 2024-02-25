@@ -16,7 +16,7 @@
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Programs to run 
-programs=( "python3 main3.py") # TODO: Add the programs to run here
+programs=("python3 main3.py" "python3 main4.py") # TODO: Add the programs to run here
 
 # Input Folder Name
 input_folder="test/input"

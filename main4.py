@@ -26,14 +26,12 @@ def main(input_file, output_file):
     while not nx.is_directed_acyclic_graph(G):
         # Find a cycle
         cycle = nx.find_cycle(G)
-
         # get a list of all the nodes in the cycle
         cycle_nodes = set()
         for edge in cycle:
             cycle_nodes.add(edge[0])
-            cycle_nodes.add(edge[1])
 
-        # remove the node with the highest out degree + in degree
+        # remove a random node from the cycle
         max_node = None
         max_degree = -1
         for node in cycle_nodes:
@@ -45,6 +43,7 @@ def main(input_file, output_file):
         # remove the node from the graph
         G.remove_node(max_node)
         nodes_to_remove.add(max_node)
+        G = helper.prune_graph(G)
 
     # Write the output
     if helper.check_validity(full_graph, nodes_to_remove):

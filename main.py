@@ -2,6 +2,10 @@ import sys
 import networkx as nx
 import helper as helper
 
+'''
+This script is basically useless. It is effectively the same thing as main2.py but with a different way of removing nodes. It is also slower than main2.py due to it not utilizing multiprocessing
+'''
+
 
 def main(input_file, output_file):
     # Build Graph
