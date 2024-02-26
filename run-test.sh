@@ -17,9 +17,9 @@ trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Input Folder Name 
 programs=("python3 main4.py" "python3 main3.py" "python3 main2.py") # TODO: Add the programs to run here (e.g. "python3 main.py", "java Main", "g++ main.cpp -o main", etc.)
-input_folder="test/input"
+input_folder="test/other-input"
 output_folder="test-out"
-valid_output_folder="test/output"
+valid_output_folder="test/other-output"
 timeout_duration=300
 
 ############################################
@@ -95,17 +95,21 @@ do
         # Get the number of removals from the valid output (first line of the file)
         valid_output=$(head -n 1 $valid_output_folder/$output_file.valid)
         valid_output=$(echo $valid_output | sed 's/[^0-9]*//g')
-        valid_nodes_removed+=($valid_output)
+
+        # Get the number of removals from the output file (first line of the file)
+        output=$(head -n 1 $output_folder/$output_file)
+        output=$(echo $output | sed 's/[^0-9]*//g')
+        
 
         # If the valid output file does not exist, copy the output file to the valid output folder
         if [ ! -f $valid_output_folder/$output_file.valid ]; then
             echo "     [NEW] $output_file is a new output file"
             cp $output_folder/$output_file $valid_output_folder/$output_file.valid
+            valid_nodes_removed+=($output)
+        else
+            valid_nodes_removed+=($valid_output)
         fi
 
-        # Get the number of removals from the output file (first line of the file)
-        output=$(head -n 1 $output_folder/$output_file)
-        output=$(echo $output | sed 's/[^0-9]*//g')
 
         # append the output to the node_removal_delta array for this test index
         delta=$((output - valid_output))
