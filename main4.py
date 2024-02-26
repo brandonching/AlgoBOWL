@@ -26,6 +26,7 @@ def main(input_file, output_file):
     while not nx.is_directed_acyclic_graph(G):
         # Find a cycle
         cycle = nx.find_cycle(G)
+        
         # get a list of all the nodes in the cycle
         cycle_nodes = set()
         for edge in cycle:

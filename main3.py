@@ -31,7 +31,6 @@ def main(input_file, output_file):
         cycle_nodes = set()
         for edge in cycle:
             cycle_nodes.add(edge[0])
-            cycle_nodes.add(edge[1])
 
         # remove the node with the highest out degree + in degree
         max_node = None

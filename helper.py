@@ -73,6 +73,10 @@ def prune_graph(graph):
         node for node in graph.nodes if graph.in_degree(node) == 0]
 
     # add nodes with no children to the list of nodes to remove
+    nodes_to_remove += [
+        node for node in graph.nodes if graph.out_degree(node) == 0]
+
+    # add nodes with no children to the list of nodes to remove
 
     # Remove the nodes from the graph
     graph.remove_nodes_from(nodes_to_remove)
@@ -93,25 +97,6 @@ def report_graph_stats(graph):
     print('Number of edges: ' + str(graph.number_of_edges()))
     print('Is directed acyclic graph: ' +
           str(nx.is_directed_acyclic_graph(graph)))
-
-    # Create a map to count the number of children for each node
-    children_count = {}
-    parents_count = {}
-    for node in graph:
-        children_count[node] = len(list(graph.successors(node)))
-        parents_count[node] = len(list(graph.predecessors(node)))
-
-    # Print the number of children for each node
-    print('Children count:')
-    for child_size in set(children_count.values()):
-        print(str(child_size),
-              str(list(children_count.values()).count(child_size)))
-
-    # Print the number of parents for each node
-    print('Parents count:')
-    for parent_size in set(parents_count.values()):
-        print(str(parent_size),
-              str(list(parents_count.values()).count(parent_size)))
 
 
 def write_output(output_file, solution):
