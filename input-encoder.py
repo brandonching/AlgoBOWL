@@ -57,8 +57,12 @@ def main(input_file):
                     f.write(str(new_id[parent-1]) + " ")
                 f.write("\n")
 
+    # save the new id array to a file
+    with open(input_file.replace(".in", "") + "-id-map.txt", 'w') as f:
+        for i in range(0, number_of_nodes):
+            f.write(str(i+1) + " " + str(new_id[i]) + "\n")
 
 
 if __name__ == "__main__":
-    input_file = "test/input/00-0-final.in"
+    input_file = "test/algobowl-in/input_group797.in"
     main(input_file)
