@@ -256,4 +256,5 @@ if __name__ == "__main__":
     output_file = "test/input/00-final.in"
 
     # Run the main function
+    # output file is the location and name of the file this script will generate (project input)
     main(output_file)
