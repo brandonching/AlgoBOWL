@@ -32,7 +32,7 @@ def main(input_file, output_file):
         for edge in cycle:
             cycle_nodes.add(edge[0])
 
-        # remove a random node from the cycle
+        # remove the node with the highest degree from the cycle
         max_node = None
         max_degree = -1
         for node in cycle_nodes:

@@ -36,6 +36,12 @@ def build_graph(input_file):
         # Split the line into a list of numbers
         nodes = list(map(int, line.split()))
 
+        # if there is no parent, delete the node
+        if len(nodes) == 1:
+            G.remove_node(parent_node)
+            parent_node += 1
+            continue
+
         # Add the edges to the graph
         for child in nodes[1:]:
             G.add_edge(child, parent_node)
@@ -72,20 +78,27 @@ def prune_graph(graph):
     nodes_to_remove = [
         node for node in graph.nodes if graph.in_degree(node) == 0]
 
+    while len(nodes_to_remove) > 0:
+        # Remove the nodes from the graph
+        graph.remove_nodes_from(nodes_to_remove)
+
+        # Get the nodes with no parents
+        nodes_to_remove = [
+            node for node in graph.nodes if graph.in_degree(node) == 0]
+
     # add nodes with no children to the list of nodes to remove
     nodes_to_remove += [
         node for node in graph.nodes if graph.out_degree(node) == 0]
 
-    # add nodes with no children to the list of nodes to remove
+    while len(nodes_to_remove) > 0:
+        # Remove the nodes from the graph
+        graph.remove_nodes_from(nodes_to_remove)
 
-    # Remove the nodes from the graph
-    graph.remove_nodes_from(nodes_to_remove)
+        # Get the nodes with no parents
+        nodes_to_remove = [
+            node for node in graph.nodes if graph.out_degree(node) == 0]
 
-    # recursively prune the graph until no more nodes with no parents are found
-    if len(nodes_to_remove) > 0:
-        return prune_graph(graph)
-    else:
-        return graph
+    return graph
 
 
 def report_graph_stats(graph):

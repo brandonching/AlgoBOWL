@@ -16,7 +16,7 @@
 trap 'echo "Ctrl+C pressed. Exiting..."; exit 1' INT
 
 # Input Folder Name 
-programs=("python3 main4.py" "python3 main3.py" "python3 main2.py" ) # TODO: Add the programs to run here (e.g. "python3 main.py", "java Main", "g++ main.cpp -o main", etc.)
+programs=("python3 main5.py") # TODO: Add the programs to run here (e.g. "python3 main.py", "java Main", "g++ main.cpp -o main", etc.)
 input_folder="test/algobowl-in"
 output_folder="test-out"
 valid_output_folder="test/algobowl-out"
