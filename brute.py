@@ -6,7 +6,7 @@ import helper as helper
 from itertools import combinations
 
 
-def main(input_file, output_file):
+def brute(input_file, output_file, nodes_to_remove=[]):
     # Build Graph
     full_graph = helper.build_graph(input_file)
     if nx.is_directed_acyclic_graph(full_graph):
@@ -14,7 +14,12 @@ def main(input_file, output_file):
         helper.write_output(output_file, [])
         return True
 
-    full_graph = helper.prune_graph(full_graph)
+    # convert the nodes_to_remove to a list of integers
+    nodes_to_remove = [int(node) for node in nodes_to_remove]
+
+    # remove nodes from the graph if they are in the nodes_to_remove list
+    full_graph.remove_nodes_from(nodes_to_remove)
+
     full_graph = helper.prune_graph(full_graph)
 
     # Brute force the best solution. Start with the full graph and remove one node at a time until the graph is a DAG. If no solution is found, then try removing two nodes at a time, and so on.
@@ -33,7 +38,10 @@ def main(input_file, output_file):
             remove_nodes = [node_id[i-1] for i in combination]
             graph.remove_nodes_from(remove_nodes)
             if nx.is_directed_acyclic_graph(graph):
-                helper.write_output(output_file, remove_nodes)
+                for i in remove_nodes:
+                    # add the nodes to the nodes_to_remove list
+                    nodes_to_remove.append(i)
+                helper.write_output(output_file, nodes_to_remove)
                 return True
 
 
@@ -49,4 +57,4 @@ if __name__ == "__main__":
     output_file = "test-out/input_group797-brute.out"
 
     # Run the main function
-    main(input_file, output_file)
+    brute(input_file, output_file)

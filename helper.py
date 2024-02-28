@@ -1,5 +1,6 @@
 import networkx as nx
 import sys
+import matplotlib as mpl
 
 
 def check_validity(graph, nodes_to_remove):
@@ -116,6 +117,9 @@ def write_output(output_file, solution):
     '''
     Write the output file
     '''
+    # sort the solution
+    solution = sorted(solution)
+
     # open the output file
     with open(output_file, 'w') as file:
         # write the number of nodes to remove
@@ -138,6 +142,156 @@ def validate_output(input_file, output_file):
     return check_validity(G, nodes_to_remove)
 
 
+def simplify_graph(graph):
+    '''
+    This function simplifies the graph by condensing linear paths of nodes
+    '''
+    # prune the graph to remove nodes with no parents and no children
+
+    graph = graph.copy()
+    start = len(graph.nodes)
+    nodes_removed = set()
+
+    # prune the graph to remove nodes with no parents and no children
+    graph = prune_graph(graph)
+
+    # get a list of nodes where in_degree = 1 and out_degree = 1
+    linear_nodes = [node for node in graph.nodes if graph.in_degree(
+        node) == 1 and graph.out_degree(node) == 1]
+
+    # get a subgraph of the linear nodes
+    linear_subgraph = graph.subgraph(linear_nodes).copy()
+
+    # test if the linear subgraph is a cycle
+    while not nx.is_directed_acyclic_graph(linear_subgraph):
+        cycle = nx.find_cycle(linear_subgraph)
+        linear_subgraph.remove_node(cycle[0][0])
+        graph.remove_node(cycle[0][0])
+        nodes_removed.add(cycle[0][0])
+        linear_nodes.remove(cycle[0][0])
+
+    # For each linear node, remove the node and connect the parent to the child
+    while len(linear_nodes) > 0:
+        node = linear_nodes[0]
+        # test if the graph needs to be pruned
+        if graph.in_degree(node) == 0 or graph.out_degree(node) == 0:
+            graph = prune_graph(graph)
+            linear_nodes = [node for node in graph.nodes if graph.in_degree(
+                node) == 1 and graph.out_degree(node) == 1]
+            continue
+        # skip if self loop
+        if list(graph.predecessors(node))[0] == node and list(graph.successors(node))[0] == node:
+            continue
+        parent = list(graph.predecessors(node))[0]
+        child = list(graph.successors(node))[0]
+        graph.add_edge(parent, child)
+        graph.remove_node(node)
+
+        # get a list of nodes where in_degree = 1 and out_degree = 1
+        linear_nodes = [node for node in graph.nodes if graph.in_degree(
+            node) == 1 and graph.out_degree(node) == 1]
+
+    # list of nodes with in_degree = 1
+    in_degree_one_nodes = [
+        node for node in graph.nodes if graph.in_degree(node) == 1]
+
+    while len(in_degree_one_nodes) > 0:
+        # get the first node in the list
+        node = in_degree_one_nodes[0]
+        # test if the graph needs to be pruned
+        if graph.in_degree(node) == 0 or graph.out_degree(node) == 0:
+            graph = prune_graph(graph)
+            in_degree_one_nodes = [
+                node for node in graph.nodes if graph.in_degree(node) == 1]
+            continue
+
+        # connect the parent to all the children
+        parent = list(graph.predecessors(node))[0]
+        children = list(graph.successors(node))
+        for child in children:
+            graph.add_edge(parent, child)
+        graph.remove_node(node)
+
+        in_degree_one_nodes = [
+            node for node in graph.nodes if graph.in_degree(node) == 1]
+
+    # list of nodes with out_degree = 1
+    out_degree_one_nodes = [
+        node for node in graph.nodes if graph.out_degree(node) == 1]
+    while len(out_degree_one_nodes) > 0:
+        # get the first node in the list
+        node = out_degree_one_nodes[0]
+        # test if the graph needs to be pruned
+        if graph.in_degree(node) == 0 or graph.out_degree(node) == 0:
+            graph = prune_graph(graph)
+            out_degree_one_nodes = [
+                node for node in graph.nodes if graph.out_degree(node) == 1]
+            continue
+        # connect the child to all the parents
+        child = list(graph.successors(node))[0]
+        parents = list(graph.predecessors(node))
+        for parent in parents:
+            graph.add_edge(parent, child)
+        graph.remove_node(node)
+        out_degree_one_nodes = [
+            node for node in graph.nodes if graph.out_degree(node) == 1]
+
+    # remove the list of nodes with self loops
+    self_loop_nodes = list(nx.nodes_with_selfloops(graph))
+    for node in self_loop_nodes:
+        graph.remove_node(node)
+        nodes_removed.add(node)
+
+    print("Size simplified graph: ", start-len(graph.nodes))
+
+    # Return the simplified graph
+    return (graph, nodes_removed)
+
+
+def draw_graph(graph, center_node=None):
+    '''
+    Draw the graph
+    '''
+    # Create a shell layout
+    pos = nx.shell_layout(graph)
+
+    # Set the center node
+    if center_node:
+        pos[center_node] = [0, 0]
+
+    # Draw the graph
+    nx.draw(graph, pos, with_labels=True, node_color='skyblue', node_size=1500, edge_color='black', linewidths=1,
+            font_size=10, font_color='black', font_weight='bold', alpha=0.9, arrowsize=20)
+
+    # Show the graph
+    mpl.pyplot.show()
+
+
+def get_subgraph(graph, node, depth):
+    '''
+    Get the subgraph of the nodes
+    '''
+    nodes_in_subgraph = set()
+    nodes_to_process = [(node, depth)]
+    while len(nodes_to_process) > 0:
+        (node, depth) = nodes_to_process.pop(0)
+        nodes_in_subgraph.add(node)
+
+        # get the children of the node
+        children = list(graph.successors(node))
+        for child in children:
+            if child not in nodes_in_subgraph and depth > 0:
+                nodes_to_process.append((child, depth - 1))
+
+        # get the parents of the node
+        parents = list(graph.predecessors(node))
+        for parent in parents:
+            if parent not in nodes_in_subgraph and depth > 0:
+                nodes_to_process.append((parent, depth - 1))
+
+    return graph.subgraph(nodes_in_subgraph)
+
+
 if __name__ == "__main__":
     # get the input file from the arguments
     input_file = sys.argv[1]
@@ -146,8 +300,4 @@ if __name__ == "__main__":
     # Build the graph from the input file
     G = build_graph(input_file)
 
-    # Get the nodes to remove from the output file
-    nodes_to_remove = get_nodes_to_remove_from_output(output_file)
-
-    # Check if the solution is valid
-    print(check_validity(G, nodes_to_remove))
+    draw_graph(get_subgraph(G, 2340, 3), 2340)

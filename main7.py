@@ -1,9 +1,20 @@
 import networkx as nx
 import helper as helper
 import sys
+import random
 
 
-def main(input_file, output_file):
+def main(input_file, output_file, target):
+    # read the output file
+    with open(input_file, 'r') as file:
+        # number of nodes to remove from first line
+        best_num_nodes = int(file.readline())
+        # list of nodes to remove is on the second line separated by spaces
+        best_nodes_to_remove = list(map(int, file.readline().split()))
+
+    # convert best_nodes_to_remove to a array of ints
+    best_nodes_to_remove = [int(node) for node in best_nodes_to_remove]
+
     # Build Graph
     full_graph = helper.build_graph(input_file)
     if nx.is_directed_acyclic_graph(full_graph):
@@ -14,9 +25,6 @@ def main(input_file, output_file):
 
     # default to remove all nodes
     nodes_to_remove = set()
-
-    (G, nodes_removed) = helper.simplify_graph(G)
-    nodes_to_remove = nodes_to_remove.union(nodes_removed)
     for node in G:
         nodes_to_remove.add(node)
 
@@ -26,7 +34,20 @@ def main(input_file, output_file):
     # reset nodes to remove
     nodes_to_remove = set()
 
+    shuffle_nodes = best_nodes_to_remove
+    random.shuffle(shuffle_nodes)
+
+    # randomly add 50% of the best nodes to remove
+    for node in shuffle_nodes[0:int(len(shuffle_nodes)/2)]:
+        nodes_to_remove.add(node)
+        G.remove_node(node)
+
+    # reprune the graph
+    G = helper.prune_graph(G)
+
     while not nx.is_directed_acyclic_graph(G):
+        if len(nodes_to_remove) > target:
+            return
         # Find a cycle
         cycle = nx.find_cycle(G)
 
@@ -48,8 +69,6 @@ def main(input_file, output_file):
         G.remove_node(max_node)
         nodes_to_remove.add(max_node)
         G = helper.prune_graph(G)
-        (G, nodes_removed) = helper.simplify_graph(G)
-        nodes_to_remove = nodes_to_remove.union(nodes_removed)
 
     # Write the output
     if helper.check_validity(full_graph, nodes_to_remove):
@@ -60,6 +79,8 @@ if __name__ == "__main__":
     # get the input file from the arguments
     input_file = sys.argv[1]
     output_file = sys.argv[2]
+    target = int(sys.argv[3])
 
     # Run the main function
-    main(input_file, output_file)
+    while True:
+        main(input_file, output_file, target)
