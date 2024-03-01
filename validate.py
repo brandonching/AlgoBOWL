@@ -11,7 +11,8 @@ def main(input_folder, output_folder):
     for output_file in output_files:
         # Get the corresponding output file
         output_file_path = os.path.join(output_folder, output_file)
-        input_file = output_file.replace('out', 'in')
+        #input_file = output_file.replace('out', 'in')
+        input_file = 'our_input.in'
         input_file_path = os.path.join(input_folder, input_file)
         # if the output is already valid, then skip it
         if output_file.endswith('.valid') or output_file.endswith('.invalid'):
